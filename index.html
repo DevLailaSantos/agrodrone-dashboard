@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroDrone - Login Enterprise</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="login-body">
+
+    <!-- VLibras Widget -->
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
+
+    <main class="login-container">
+        <!-- Barra de Acessibilidade Alinhada ao Topo do Card -->
+        <div class="login-acessibilidade">
+            <button type="button" onclick="definirTema('claro')">☀️ Claro</button>
+            <button type="button" onclick="definirTema('escuro')">🌙 Escuro</button>
+            <button type="button" onclick="definirTema('daltonico')">👁️ Daltônico</button>
+        </div>
+
+        <div class="login-card">
+            <div class="brand">
+                <h1>AGRO<span>DRONE</span></h1>
+                <p>Gestão de Frota e Operações</p>
+            </div>
+
+            <form id="form-login" onsubmit="realizarLogin(event)">
+                <div class="form-group">
+                    <label for="email">E-mail Corporativo</label>
+                    <input type="email" id="email" value="admin@agrodrone.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" value="123456" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="perfil">Perfil de Acesso</label>
+                    <select id="perfil" required>
+                        <option value="admin">Administrador (Acesso Total)</option>
+                        <option value="operador">Operador (Campo)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary btn-block">Acessar Sistema</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
