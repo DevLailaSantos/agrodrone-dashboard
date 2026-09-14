@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroDrone Enterprise - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body">
+
+    <!-- VLibras Widget -->
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <h2>AGRO<span>DRONE</span></h2>
+                <small id="user-badge" class="badge">ADMIN</small>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#kpis-section" class="active">📊 Telemetria / Painel</a>
+                <a href="#ferramentas-section">🧮 Calculadora de Calda</a>
+                <a href="#estoque-section">📦 Estoque Insumos</a>
+                <a href="#crud-section">🛸 Frota Drones</a>
+            </nav>
+        </div>
+        <div>
+            <p id="user-email" style="font-size: 0.75rem; opacity: 0.8;"></p>
+            <button type="button" onclick="logout()" class="btn-logout">SAIR DO SISTEMA</button>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <header class="top-header">
+            <div>
+                <h1>Painel de Controle Operacional</h1>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Gestão Agrícola e Suporte ao Piloto DJI Agras</p>
+            </div>
+            <div class="topbar-acessibilidade">
+                <button type="button" onclick="definirTema('claro')">☀️ Claro</button>
+                <button type="button" onclick="definirTema('escuro')">🌙 Escuro</button>
+                <button type="button" onclick="definirTema('daltonico')">👁️ Daltônico</button>
+            </div>
+        </header>
+
+        <!-- KPIS -->
+        <section id="kpis-section" class="kpi-grid">
+            <div class="kpi-card">
+                <h3>Frota Ativa</h3>
+                <p class="kpi-value" id="kpi-drones">0</p>
+                <span>Drones Registrados</span>
+            </div>
+            <div class="kpi-card">
+                <h3>Área Aplicada</h3>
+                <p class="kpi-value">4.850 ha</p>
+                <span>Total Acumulado</span>
+            </div>
+            <div class="kpi-card">
+                <h3>Estoque Crítico</h3>
+                <p class="kpi-value" id="kpi-estoque-alerta" style="color: var(--danger-color);">0</p>
+                <span>Produtos Abaixo do Mínimo</span>
+            </div>
+        </section>
+
+        <!-- DASHBOARD / GRÁFICOS CORRIGIDOS -->
+        <section class="charts-grid">
+            <div class="chart-card">
+                <h3 style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px;">Produtividade Operacional (Hectares)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartHectares"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3 style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px;">Status da Frota</h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartFrota"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- CALCULADORA DE CALDA -->
+        <section id="ferramentas-section" class="crud-container" style="margin-bottom: 30px;">
+            <h2>🧮 Calculadora de Calda & Análise de Risco</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">Otimização de abastecimento ajustada por modelo de hardware.</p>
+
+            <form id="form-calculadora" onsubmit="calcularCalda(event)" class="form-grid">
+                <div class="form-group">
+                    <label for="calc-drone-modelo">Modelo do Drone</label>
+                    <select id="calc-drone-modelo" required>
+                        <option value="">Selecione...</option>
+                        <option value="T40">DJI Agras T40 (40L)</option>
+                        <option value="T70">DJI Agras T70 (70L)</option>
+                        <option value="T100">DJI Agras T100 (100L)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="calc-area">Área Lavoura (ha)</label>
+                    <input type="number" id="calc-area" placeholder="Ex: 50" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="calc-taxa">Taxa Aplicação (L/ha)</label>
+                    <input type="number" id="calc-taxa" placeholder="Ex: 10" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="calc-dosagem">Dosagem Produto (L/ha)</label>
+                    <input type="number" id="calc-dosagem" placeholder="Ex: 1.5" step="0.01" required>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <button type="submit" class="btn-primary">Calcular Mistura & Validar Voo</button>
+                </div>
+            </form>
+
+            <div id="resultado-calculo" class="alert-box" style="display: none;">
+                <h4>📋 Diagnóstico e Mistura Recomendada:</h4>
+                <ul id="lista-diagnostico" style="margin-left: 20px; margin-top: 10px; line-height: 1.6;"></ul>
+            </div>
+        </section>
+
+        <!-- ESTOQUE -->
+        <section id="estoque-section" class="crud-container" style="margin-bottom: 30px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>📦 Controle de Estoque de Insumos</h2>
+                <button id="btn-novo-insumo" type="button" class="btn-primary" onclick="abrirModal('modal-estoque')">+ Cadastrar Insumo</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Produto</th><th>Categoria</th><th>Qtd. Atual</th><th>Qtd. Mínima</th><th>Status</th></tr>
+                </thead>
+                <tbody id="tabela-estoque"></tbody>
+            </table>
+        </section>
+
+        <!-- FROTA (CRUD) -->
+        <section id="crud-section" class="crud-container">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>🛸 Gestão da Frota de Drones</h2>
+                <button id="btn-novo-drone" type="button" class="btn-primary" onclick="abrirModal('modal-drone')">+ Cadastrar Drone</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Modelo</th><th>Série</th><th>Capacidade (L)</th><th>Status</th><th>Ações</th></tr>
+                </thead>
+                <tbody id="tabela-drones"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- Modal Drone -->
+    <div id="modal-drone" class="modal hidden">
+        <div class="modal-content">
+            <h3>Cadastrar / Editar Drone</h3>
+            <form id="form-drone" onsubmit="salvarDrone(event)">
+                <input type="hidden" id="drone-id">
+                <div class="form-group"><label for="drone-modelo">Modelo</label><input type="text" id="drone-modelo" required></div>
+                <div class="form-group"><label for="drone-serie">Nº Série</label><input type="text" id="drone-serie" required></div>
+                <div class="form-group"><label for="drone-capacidade">Tanque (L)</label><input type="number" id="drone-capacidade" required></div>
+                <div class="form-group">
+                    <label for="drone-status">Status</label>
+                    <select id="drone-status"><option value="Operacional">Operacional</option><option value="Manutenção">Manutenção</option></select>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn-secondary" onclick="fecharModal('modal-drone')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Insumo -->
+    <div id="modal-estoque" class="modal hidden">
+        <div class="modal-content">
+            <h3>Cadastrar Insumo</h3>
+            <form id="form-insumo" onsubmit="salvarInsumo(event)">
+                <div class="form-group"><label for="insumo-nome">Nome</label><input type="text" id="insumo-nome" required></div>
+                <div class="form-group"><label for="insumo-categoria">Categoria</label><input type="text" id="insumo-categoria" required></div>
+                <div class="form-group"><label for="insumo-qtd">Qtd. Atual</label><input type="number" id="insumo-qtd" required></div>
+                <div class="form-group"><label for="insumo-min">Qtd. Mínima</label><input type="number" id="insumo-min" required></div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn-secondary" onclick="fecharModal('modal-estoque')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
